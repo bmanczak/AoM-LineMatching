@@ -1,1 +1,4 @@
 /frames/
+.DS_Store
+*.xml
+*.iml
