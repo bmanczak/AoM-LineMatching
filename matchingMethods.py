@@ -21,7 +21,8 @@ def match_lines(data, obj, delta_angle=3):
     TO-DO: length_prop - the proportion of length to be qualified as a match, e.g. length_prop=0.5 means that the matched length must be at least
 
     Returns: pandas DataFrame
-        dataframe of lines with columns: path, scale, angle, line, length, line coords in the input image
+        dataframe of lines with columns: path, scale, angle, line, length, line coords in the query image and
+            optionally (not needed in further processing, just for visual inspection) the angle and length of the lines in the query image
 
     """
     matches = pd.DataFrame()
@@ -31,8 +32,8 @@ def match_lines(data, obj, delta_angle=3):
         match = close_angle_data.iloc[(close_angle_data['length'] - obj.length[i][0]).abs().argsort()][
                 :1]  # given the angle data, find the closest match in length
         match["obj_line"] = [obj.lines[i]]
-        match["obj_angle"] = obj.angle[i]  # just to show how great the match is, can be deleted later
-        match["obj_length"] = obj.length[i]
+        #match["obj_angle"] = obj.angle[i]  # just to show how great the match is, can be deleted later
+        #match["obj_length"] = obj.length[i]
         matches = pd.concat([matches, match])
     matches.dropna(inplace=True)
     matches["line"] = matches["line"].apply(lambda x: x.flatten())
@@ -53,8 +54,8 @@ def score_the_line(matches, normalizing_stats = [71.73, 26.70, 254.71, 94.19],
     matches: pandas DataFrame
         contains information about the matched lines as returned by match_lines
     normalizing_stats: list like
-        a list-like object contating mean and standard deviation of the absolute values of angle and length respectively (list of length 4).
-        Defeault contains means and avergaes from 5 videos from testing phase.
+        a list-like object containing mean and standard deviation of the absolute values of angle and length respectively (list of length 4).
+        Default contains means and averages from 5 videos from testing phase.
     angle_weight: float
         weight of the angle in the score calculation
     length_weight: float
@@ -67,12 +68,10 @@ def score_the_line(matches, normalizing_stats = [71.73, 26.70, 254.71, 94.19],
 
     Returns:
     ----------------------
-        dataframe of lines with columns: path, scale, angle, line, length, line coords in the input image, score
+        dataframe of lines with columns: path, scale, angle, line, length, line coords in the input image, normalized angle and length, score
     """
     matches_normalized = matches.copy()
     angle_mean, angle_std, length_mean, length_std = normalizing_stats
-
-    matches_normalized = matches.copy()
 
     matches_normalized["angle_normalized"] = (abs(matches_normalized["angle"]) - angle_mean) / angle_std
     matches_normalized["length_normalized"] = (matches_normalized["length"] - length_mean) / length_std
@@ -104,12 +103,12 @@ def sample_line(matches, num_lines=1, factor=2):
     Returns:
     ----------------------------------------------
 
-    matches_new.sample(...): padnas data frame
+    matches_new.sample(...): pandas data frame
         Samples of matches
 
     """
     matches_new = matches.copy()
-    start_val = 1  # does not reallt matter as numbers will be
+    start_val = 1  # does not really matter as numbers will be
     probs = [start_val]
     for i in range(matches.shape[0] - 1):
         probs.append(probs[i] / factor)
@@ -123,14 +122,14 @@ def sample_line(matches, num_lines=1, factor=2):
 
 def get_the_line_rect(line_coords, img, margin_x=0, margin_y=0):
     """
-    Returns the rectangluar crop with diganol being the line with specified 'line_coords' optionally modified by a margin.
+    Returns the rectangular crop with diagonal being the line with specified 'line_coords' optionally modified by a margin.
 
     Parameters:
     ---------------------------------------
     line_coords: list
         Has format  [x_start,y_start, x_end,y_end]
     img: np.array
-        an imgae
+        an image
     margin_x: int
         How should the line be modified in x direction
     margin_y: int
@@ -161,22 +160,24 @@ def overlay_on_img(img, matches, non_zero_objects_dic, margin_x=0, margin_y=0, a
     Parameters:
     ---------------------------------------
     img: np.array
-        an imgae
+        an image
     matches: pandas DataFrame
-
+        dataframe of lines with columns: path, scale, angle, line, length, line coords in the input image, normalized angle and length and score
+    non_zero_objects_dic: dictionary
+        Dictionary with keys being paths to the images in the archive that have lines and keys being the matchingObjects that store them. Allows for fast overlaying.
     margin_x: int
         How should the line be modified in x direction
     margin_y: int
         How should the line be modified in x direction
     adaptive_margin: bool
         Specifies if the automatic margin should be performed.
-        Automatic margin adds the margin based on trainge weight function. The added margin is 0 at 45 degrees and symmetric around 45 degrees.
+        Automatic margin adds the margin based on triangular weight function. The added margin is 0 at 45 degrees and symmetric around 45 degrees.
 
 
     Returns:
     ---------------------------------------
-    matched_rect: np.array
-        the cropped rectangle
+    overlayed: np.array
+        An image with overlayed match
 
     """
     new_img = img.copy()
@@ -223,14 +224,14 @@ def all_in_one(path, data, non_zero_objects_dic,num_lines = 1, normalizing_stats
     path: str
         A path to an image. Can be modified for obj to be read directly from array, see matchingObjects init
     data: pandas DataFrame
-        database of lines with columns: path, angle, line, lengtg
+        database of lines with columns: path, angle, line, length
     non_zero_objects_dic: dictionary
         Dictionary with keys being paths to the images in the archive that have lines and keys being the matchingObjects that store them. Allows for fast overlaying.
     num_lines: int
         how many matches to overlay. If num_lines bigger than matches, all matches are overlayed..
     normalizing_stats: list like
         a list-like object contating mean and standard deviation of the absolute values of angle and length respectively (list of length 4).
-        Defeault contains means and avergaes from 5 videos from testing phase.
+        Default contains means and avergaes from 5 videos from testing phase.
     params_hough: dictionary
         dictionary storing parameter values for hough transform
 
@@ -244,7 +245,7 @@ def all_in_one(path, data, non_zero_objects_dic,num_lines = 1, normalizing_stats
     img = plt.imread(path)  # read in query image
     obj = matchingObjects(img=img, scale=1, margin=0)  # make it a matchingObject class
     obj.hough_lines(radians=False, **params_hough)  # detect lines
-    obj.rank_and_pick_lines(delta_angle=3, max_lines=None)  # filter similiar lines
+    obj.rank_and_pick_lines(delta_angle=3, max_lines=None)  # filter similar lines
     matches = match_lines(data, obj)  # find matches
 
     # Calculate the score for each candidate match

@@ -7,9 +7,7 @@ Created by Blazej Manczak, Fall 2020
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import os
-import pandas as pd
-import time
+
 
 
 def apply_hough(img, threshold=100, minLineLength=150, maxLineGap=30):
