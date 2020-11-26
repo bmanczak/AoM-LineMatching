@@ -44,7 +44,7 @@ ArtifactsOfMemory
 │
 │   data/ % stores the data produced by processArchives.py
 ```
-Note that folders ``archives``, ``frames`` and ``data`` is not in this repo. Prior to execution you must **create the folders yourself**.
+Note that folders ``archives``, ``frames`` and ``data`` is not in this repo. Prior to execution you must **create these folders yourself**.
 ### Example execution
 ```
 cd ../ArtifactsOfMemory
