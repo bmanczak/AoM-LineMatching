@@ -52,3 +52,5 @@ conda activate AOM
 python processArchives.py --scale 0.8 --sample 0.5 
 python overlay.py --num_lines 2 --hough_params 200,150,25
 ```
+### Example output
+![Example output](https://github.com/blazejmanczak/ArtifactsOfMemory/blob/master/example_out.png)
