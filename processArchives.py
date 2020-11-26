@@ -21,7 +21,7 @@ import pickle
 import numpy as np
 import pandas as pd
 
-"""This script generates and saves a pickle of the pandas DataFrame and used for matching to a query image later"""
+"""This script generates and saves a pickle of the pandas DataFrame and a dictionary used for matching to a query image later"""
 
 def print_config():
     """
