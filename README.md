@@ -36,7 +36,7 @@ ArtifactsOfMemory
 │   overlay.py
 │   
 │   archives/ % contains at least one folder
-│      AOV XXX/  % folder containing images from which to extract line
+│      folderWithImgs/  % folder containing images from which to extract line
 │   
 │   frames/ 
 │       contemporary/ % folder containing the query images on which the matches should be overlayed
