@@ -2,7 +2,7 @@
 ### extracting, filtering and matching lines from a set of frames to a query image .
 
 Welcome to this repo! In this repo you can find an efficient implementation of detecting, filtering and matching the lines from a set of frames to the lines detected in the query image.
-You can find step by step details in ``walkthrough.ipynb``. This project has been realized in collaboration with the *Dutch Institute of Sound and Vision* and *SuperPosition*. We used the frames extracted from video archives as the extraction set. 
+You can find step by step details in ``walkthrough.ipynb``. This project has been realized in collaboration with the *Netherlands Institute of Sound and Vision* and *SuperPosition*. We used the frames extracted from video archives as the extraction set. 
 
 ### The pipeline
 The pipeline consists of two main parts. The first part concerns dealing with the video archives and the second part with matching the lines from a query image with the matched lines from the archive.
