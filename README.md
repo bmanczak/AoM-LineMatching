@@ -36,7 +36,7 @@ ArtifactsOfMemory
 │   overlay.py
 │   
 │   archives/ % contains at least one folder
-│      AOV XXX/  % folder containing images from which to extract line
+│      folderWithImgs/  % folder containing images from which to extract line
 │   
 │   frames/ 
 │       contemporary/ % folder containing the query images on which the matches should be overlayed
@@ -44,7 +44,7 @@ ArtifactsOfMemory
 │
 │   data/ % stores the data produced by processArchives.py
 ```
-Note that folders ``archives``, ``frames`` and ``data`` is not in this repo. Prior to execution you must **create the folders yourself**.
+Note that folders ``archives``, ``frames`` and ``data`` is not in this repo. Prior to execution you must **create these folders yourself**.
 ### Example execution
 ```
 cd ../ArtifactsOfMemory
@@ -52,3 +52,5 @@ conda activate AOM
 python processArchives.py --scale 0.8 --sample 0.5 
 python overlay.py --num_lines 2 --hough_params 200,150,25
 ```
+### Example output
+![Example output](https://github.com/blazejmanczak/ArtifactsOfMemory/blob/master/example_out.png)
