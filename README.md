@@ -21,7 +21,7 @@ This step can be applied with ``processArchives.py`` script (customize with comm
 - perform the matching procedure
 - fetch the match and overlay it on the query image
 
-This step can be applied with ``overlay.py`` script (customize with command line arguments). This script uses methods in ``matchingMethods.py``.
+This step can be applied with ``overlay.py`` script (customize with command line arguments). This script uses methods from ``matchingMethods.py``.
 
 ### Environment 
 We provide a conda environment called ``AOM`` which contains all packages you need to execute the scripts in this repo.
