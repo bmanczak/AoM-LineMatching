@@ -1,4 +1,5 @@
 /frames/
+/archives/
 .DS_Store
 *.xml
 *.iml
