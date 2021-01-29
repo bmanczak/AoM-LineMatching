@@ -17,6 +17,38 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+def mask_clusters(arr, delta_angle):
+    """
+    Createas a boolean array where clusters are interuptted with an if statement
+    
+    Parameters:
+    ------------------------
+    arr: np array
+        contains sorted (angle) values, shape [#num_lines, 1]
+    delta_angle: int
+        what is the furthest angle to yield a match? Note that the matches are first filtered on angle and only then on length
+   
+    Returns:
+    bool_arr: pandas DataFrame
+        a boolean array with the same shape as arr
+    
+    """
+    arr = list(arr) # get just the numbers of the array in the list
+    bool_arr = []
+    
+    start_cluster_val = arr[0] # first element starts the cluster
+    
+    for cluster_element in arr:
+        if abs(cluster_element - start_cluster_val) <= delta_angle:
+            bool_arr.append(True)
+        else:
+            bool_arr.append(False)
+            start_cluster_val = cluster_element
+            
+    bol_arr = np.array(bool_arr).reshape(-1,1)
+    return bol_arr
+
+    
 def apply_hough(img, threshold=100, minLineLength=150, maxLineGap=30):
     """
     Applies the probabilistic Hough transform on the given img with given parameters.
@@ -203,10 +235,10 @@ class matchingObjects:
             # self.slope = y_diff/x_diff # can be calculated if needed.
             self.length = np.sqrt(x_diff ** 2 + y_diff ** 2)
 
-    def rank_and_pick_lines(self, delta_angle=1, max_lines=None):
+    def rank_and_pick_lines(self, delta_angle = 1, max_lines = None):
         """
         Filters out lines having similiar angles (taking the longest line out of the "similiar ones") to later limit the dimensionality of the database of lines.
-
+        
         Parameters:
         -----------------
         delta_angle: float
@@ -218,63 +250,45 @@ class matchingObjects:
         initial_max = np.max(self.length)
         if self.lines is not None:
             lst0 = self.lines
-            order = np.arange(0, len(lst0)).reshape(-1, 1)
+            order = np.arange(0, len(lst0)).reshape(-1,1)
             lst1 = self.angle
             lst2 = self.length
-            merged = np.concatenate([lst1, lst2, order], axis=1)
-            new_order = np.lexsort((lst2, lst1), axis=0)  # sorts first by angle then by length
+            merged = np.concatenate([lst1, lst2, order], axis = 1)
+            new_order = np.lexsort((lst2, lst1), axis = 0) # sorts first by angle then by length
             merged_new = merged[new_order]  #
+    
+            
+            grouping_mask = mask_clusters(merged[new_order][:,:,0], delta_angle) 
+            accum = [] #stores the longest line from found clusters 
+            temp = [] # empty list for booking within clusters of similiar lines
 
-            mask = (np.diff(merged[new_order], axis=0)[:, :,
-                    0] < delta_angle)  # boolean mask indicating whether the sorted values are withing delta_angle of each other
-            series = False
-
-            for i in range(len(mask)):  # marks
-                if mask[i] == True:
-                    series = True
-                elif (mask[i] == False) and (series == True):
-                    mask[i] = True  # make up for the offset in the mask
-                    series = False  # break the series
-
-            grouping_mask = np.concatenate((mask, np.array([[False]])))  # adding the dimension lost by np.diff
-            accum = []  # stores the longest line from found clusters
-            temp = []  # empty list for booking within clusters of similiar lines
-
-            for i in range(len(grouping_mask)):
-                if grouping_mask[i] == False:
-                    if (len(temp) > 0):
-                        accum.append(np.array(temp)[np.argmax(np.array(temp), axis=0)[0][1]])
-                        temp = []
-                    accum.append(merged_new[i, :, :])
-
-
-                else:  # if grouping_mask[i] == True:
-                    if len(temp) > 0:
-                        if abs(merged_new[i, :, :][0][0] - temp[-1][0][0]) < delta_angle:
-                            temp.append(merged_new[i, :, :])
-                        else:
-
-                            accum.append(np.array(temp)[np.argmax(np.array(temp), axis=0)[0][1]])
-                            temp = []
-                            temp.append(merged_new[i, :, :])
-                    else:
-
-                        temp.append(merged_new[i, :, :])
-
+            #print(grouping_mask)
+            for i in range(len(grouping_mask)): 
+                if grouping_mask[i] == True:
+                    temp.append(merged_new[i,:,:])
+                else:
+                    accum.append(np.array(temp)[np.argmax(np.array(temp), axis = 0)[0][1]])
+                    temp = []
+                    temp.append(merged_new[i,:,:])
+            if len(temp)> 0: # push the last cluster 
+                accum.append(np.array(temp)[np.argmax(np.array(temp), axis = 0)[0][1]])                    
+    
+            
             accum = np.array(accum)
-            accum = accum[np.argsort(accum[:, :, 1], axis=0)]  # sort by length
-            if max_lines is not None:  # if the maximum number of lines to be returned is specifed, pick the longest max_lines lines
+            accum = accum[np.argsort(accum[:,:,1], axis = 0)] # sort by length
+            #print("accum",accum)
+            if max_lines is not None: # if the maximum number of lines to be returned is specifed, pick the longest max_lines lines
                 accum = accum[-max_lines:]
-            cleaned_order = list(accum[:, :, :, 2].flatten().astype(int))
-
-            # Update the attribute values
+            cleaned_order = list(accum[:,:,:,2].flatten().astype(int))
+            
+            
+            #Update the attribute values
             self.lines = self.lines[cleaned_order]
             self.angle = self.angle[cleaned_order]
             self.length = self.length[cleaned_order]
-            # self.slope = self.slope[cleaned_order]
             final_max = np.max(self.length)
-
-            assert (abs(final_max - initial_max) < 0.01)  # making sure the line of max length is preserved
+        
+            assert (abs(final_max - initial_max) < 0.01) # making sure the line of max length is preserved
 
         def plot_matches(self, matches, buffer=5):
             self.matched_img = np.copy(self.img)
