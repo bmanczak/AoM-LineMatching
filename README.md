@@ -1,8 +1,8 @@
-# Artifacts Of Memory: 
+# Artifacts Of Memory - Line Matching system: 
 ### extracting, filtering and matching lines from a set of frames to a query image .
 
 Welcome to this repo! In this repo you can find an efficient implementation of detecting, filtering and matching the lines from a set of frames to the lines detected in the query image.
-You can find step by step details in ``walkthrough.ipynb``. This project has been realized in collaboration with the *Netherlands Institute of Sound and Vision* and *SuperPosition*. We used the frames extracted from video archives as the extraction set. 
+You can find step by step details in ``walkthrough.ipynb``. This project has been realized in collaboration with the *Netherlands Institute of Sound and Vision* and *Superposition* in the context of their project [**Artifacts of Memory**](https://superposition-cc.medium.com).  We used the frames extracted from video archives as the extraction set. 
 
 ### The pipeline
 The pipeline consists of two main parts. The first part concerns dealing with the video archives and the second part with matching the lines from a query image with the matched lines from the archive.
@@ -21,7 +21,7 @@ This step can be applied with ``processArchives.py`` script (customize with comm
 - perform the matching procedure
 - fetch the match and overlay it on the query image
 
-This step can be applied with ``overlay.py`` script (customize with command line arguments). This script uses methods in ``matchingMethods.py``.
+This step can be applied with ``overlay.py`` script (customize with command line arguments). This script uses methods from ``matchingMethods.py``.
 
 ### Environment 
 We provide a conda environment called ``AOM`` which contains all packages you need to execute the scripts in this repo.
